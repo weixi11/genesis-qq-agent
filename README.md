@@ -112,9 +112,7 @@ pnpm test:scheduler
 
 仓库保留源码、测试、文档和配置示例，便于展示 Agent 架构和开发实现。
 
-## 申请材料
-
-- [Xiaomi MiMo 100T 申请内容](docs/xiaomi-mimo-100t-application.md)
+## 文档
 - [架构优化总览](docs/plan_part1_overview.md)
 - [消息 API 文档](docs/MESSAGE_API.md)
 
