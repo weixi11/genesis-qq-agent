@@ -1,0 +1,15 @@
+name: read_file
+displayName: 文件分析
+version: "1.0.0"
+description: 读取并分析文件内容（支持 Word, Excel, 文本等）
+
+triggers:
+  keywords: [读文件, 读取文件, 分析文件, 看文件, 文件内容, 读文档]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0

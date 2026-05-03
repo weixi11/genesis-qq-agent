@@ -1,0 +1,15 @@
+name: meme_send
+displayName: 发表情包
+version: "1.0.0"
+description: 发送本地表情包或斗图图片
+
+triggers:
+  keywords: [表情包, 斗图, 发表情, 发个表情, 来个表情, 生气表情, 疑问表情]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 2
+  global: 0

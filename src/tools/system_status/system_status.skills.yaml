@@ -1,0 +1,15 @@
+name: system_status
+displayName: 系统状态
+version: "1.0.0"
+description: 查询系统运行状态
+
+triggers:
+  keywords: [系统状态, 运行状态, 服务器状态, 系统信息, bot状态, 机器人状态]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 5
+  global: 0

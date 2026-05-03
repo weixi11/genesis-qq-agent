@@ -1,0 +1,15 @@
+name: banana_draw
+displayName: Banana 绘图
+version: "1.0.0"
+description: 高级绘图与改图工具，支持普通文生图、手办化、四格漫画、自拍化等 Banana 风格处理
+
+triggers:
+  keywords: [banana, 香蕉画图, 手办化, 四格漫画, 自拍化, banana_draw]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 5
+  global: 0

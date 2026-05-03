@@ -1,0 +1,15 @@
+name: draw
+displayName: AI 绘图
+version: "1.0.0"
+description: AI 绘图，根据描述生成图片
+
+triggers:
+  keywords: [画, 绘, 生成图, 画一个, 画一张, draw, paint]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 5
+  global: 0

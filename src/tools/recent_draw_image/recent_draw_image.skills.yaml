@@ -1,0 +1,15 @@
+name: recent_draw_image
+displayName: 重发绘图
+version: "1.0.0"
+description: 重发之前由绘图工具生成并保存在本机的图片
+
+triggers:
+  keywords: [之前画的图, 上次画的图, 刚才画的图, 重发.*图, 再发.*图, 发.*之前.*图, 发.*上次.*图, 最近画的图]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 1
+  global: 0

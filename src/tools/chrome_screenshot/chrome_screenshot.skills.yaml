@@ -1,0 +1,15 @@
+name: chrome_screenshot
+displayName: Chrome 网页截图
+version: "1.0.0"
+description: 使用 Chrome/Chromium 打开网页并截图，支持桌面和手机视口
+
+triggers:
+  keywords: [网页截图, 浏览器截图, 截图网页, 截个网页, chrome截图, 网页快照, 页面截图, 手机截图]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 2
+  global: 0

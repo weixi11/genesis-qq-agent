@@ -1,0 +1,2 @@
+Line 106: @typescript-eslint/no-unsafe-assignment - Unsafe assignment of an `any` value.
+Line 136: @typescript-eslint/no-unsafe-assignment - Unsafe assignment of an `any` value.

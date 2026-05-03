@@ -1,0 +1,15 @@
+name: avatar
+displayName: 获取头像
+version: "1.0.0"
+description: 获取QQ用户头像或群头像
+
+triggers:
+  keywords: [头像, 头像是什么, 看.*头像, 发.*头像, 头像发, 获取头像]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0

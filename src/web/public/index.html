@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1220">
+    <title>Genesis 控制台</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b1220'/%3E%3Cpath d='M18 18h28v8H27v10h14v8H27v2h19v8H18V18Z' fill='%2360a5fa'/%3E%3C/svg%3E">
+    <script>
+        (function () {
+            let path = window.location.pathname || '/';
+            if (path.endsWith('/index.html')) {
+                path = path.slice(0, -'/index.html'.length) || '/';
+            }
+            if (path.endsWith('/login')) {
+                path = path.slice(0, -'/login'.length) || '/';
+            }
+            if (path.length > 1 && path.endsWith('/')) {
+                path = path.slice(0, -1);
+            }
+            const basePath = path === '/' ? '' : path;
+            window.GENESIS_BASE_PATH = basePath;
+            document.documentElement.dataset.basePath = basePath;
+        })();
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">GENE<span>SIS</span></div>
+        <div class="nav">
+            <div class="nav-item active" data-page="dashboard">
+                <div class="nav-icon">🏠</div><span>概览 Dashboard</span>
+            </div>
+            <div class="nav-item" data-page="config">
+                <div class="nav-icon">⚙️</div><span>配置 Config</span>
+            </div>
+            <div class="nav-item" data-page="tools">
+                <div class="nav-icon">🔧</div><span>工具 Tools</span>
+            </div>
+            <div class="nav-item" data-page="agents">
+                <div class="nav-icon">🤖</div><span>Agent 控制</span>
+            </div>
+            <div class="nav-item" data-page="profiles">
+                <div class="nav-icon">👥</div><span>用户画像 Profiles</span>
+            </div>
+            <div class="nav-item" data-page="knowledge">
+                <div class="nav-icon">📚</div><span>知识库 RAG</span>
+            </div>
+            <div class="nav-item" data-page="memes">
+                <div class="nav-icon">🎭</div><span>表情包 Memes</span>
+            </div>
+            <div class="nav-item" data-page="context">
+                <div class="nav-icon">🧠</div><span>短期记忆 Memory</span>
+            </div>
+            <div class="nav-item" data-page="blacklist">
+                <div class="nav-icon">⛔</div><span>黑白名单 Access</span>
+            </div>
+            <div class="nav-item" data-page="tasks">
+                <div class="nav-icon">📋</div><span>任务管理 Tasks</span>
+            </div>
+            <div class="nav-item" data-page="logs">
+                <div class="nav-icon">📜</div><span>系统日志 Logs</span>
+            </div>
+            <div class="nav-item" data-page="llm">
+                <div class="nav-icon">🔗</div><span>LLM 调用 Calls</span>
+            </div>
+            <div class="nav-item" data-page="scheduler">
+                <div class="nav-icon">⏰</div><span>定时调度 Scheduler</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <div class="page-title" id="page-header">概览 Dashboard</div>
+            <div style="font-size: 14px; color: var(--text-sub);">
+                <span id="connection-status" class="badge badge-neutral">⚪ 未连接</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard -->
+            <div class="page active" id="page-dashboard">
+                <!-- 顶部：机器人信息 + 运行状态 -->
+                <div class="dashboard-hero">
+                    <div class="bot-card">
+                        <div class="bot-avatar-wrapper">
+                            <img class="bot-avatar" id="dash-bot-avatar"
+                                src="https://q.qlogo.cn/headimg_dl?dst_uin=10000&spec=640" alt="Bot">
+                            <div class="bot-status-dot"></div>
+                        </div>
+                        <div class="bot-info">
+                            <div class="bot-name" id="dash-bot-name">Bot</div>
+                            <div class="bot-qq" id="dash-bot-qq-hero">-</div>
+                            <div class="bot-admin">Admin: <span id="dash-admin-hero">-</span></div>
+                        </div>
+                    </div>
+                    <div class="uptime-card">
+                        <div class="uptime-icon">⏱️</div>
+                        <div class="uptime-info">
+                            <div class="uptime-value" id="dash-uptime">-</div>
+                            <div class="uptime-label">运行时间</div>
+                            <div class="uptime-start">启动于 <span id="dash-start-time">-</span></div>
+                        </div>
+                    </div>
+                    <div class="uptime-card agent-control-card">
+                        <div class="uptime-icon">🤖</div>
+                        <div class="uptime-info">
+                            <div class="uptime-value agent-control-status" id="dash-agent-status">-</div>
+                            <div class="uptime-label">Agent 进程</div>
+                            <div class="uptime-start">PID <span id="dash-agent-pid">-</span> · 重启 <span id="dash-agent-restarts">-</span> 次</div>
+                            <div class="agent-control-actions">
+                                <button class="btn btn-sm" id="btn-agent-start" onclick="window.controlAgentProcess('start')">启动</button>
+                                <button class="btn btn-sm btn-danger" id="btn-agent-stop" onclick="window.controlAgentProcess('stop')">停止</button>
+                                <button class="btn btn-sm btn-primary" id="btn-agent-restart" onclick="window.controlAgentProcess('restart')">重启</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="uptime-card agent-control-card">
+                        <div class="uptime-icon">🔌</div>
+                        <div class="uptime-info">
+                            <div class="uptime-value agent-control-status" id="dash-adapter-status">-</div>
+                            <div class="uptime-label">NapCat 适配器</div>
+                            <div class="uptime-start">PID <span id="dash-adapter-pid">-</span> · 重启 <span id="dash-adapter-restarts">-</span> 次</div>
+                            <div class="agent-control-actions">
+                                <button class="btn btn-sm" id="btn-adapter-start" onclick="window.controlAdapterProcess('start')">启动</button>
+                                <button class="btn btn-sm btn-danger" id="btn-adapter-stop" onclick="window.controlAdapterProcess('stop')">停止</button>
+                                <button class="btn btn-sm btn-primary" id="btn-adapter-restart" onclick="window.controlAdapterProcess('restart')">重启</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统资源监控 -->
+                <div class="section-title">📊 系统资源 System Resources</div>
+                <div class="resource-grid">
+                    <div class="resource-card">
+                        <div class="ring-progress" data-value="0" data-color="#58a6ff">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-bg" cx="50" cy="50" r="42" />
+                                <circle class="ring-fill" id="ring-cpu" cx="50" cy="50" r="42" />
+                            </svg>
+                            <div class="ring-value" id="dash-cpu-percent">0%</div>
+                        </div>
+                        <div class="resource-label">CPU</div>
+                        <div class="resource-sub" id="dash-cpu-model">-</div>
+                    </div>
+                    <div class="resource-card">
+                        <div class="ring-progress" data-value="0" data-color="#3fb950">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-bg" cx="50" cy="50" r="42" />
+                                <circle class="ring-fill" id="ring-mem" cx="50" cy="50" r="42" />
+                            </svg>
+                            <div class="ring-value" id="dash-mem-percent">0%</div>
+                        </div>
+                        <div class="resource-label">内存</div>
+                        <div class="resource-sub" id="dash-mem-detail">-</div>
+                    </div>
+                    <div class="resource-card">
+                        <div class="ring-progress" data-value="0" data-color="#d29922">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-bg" cx="50" cy="50" r="42" />
+                                <circle class="ring-fill" id="ring-disk" cx="50" cy="50" r="42" />
+                            </svg>
+                            <div class="ring-value" id="dash-disk-percent">0%</div>
+                        </div>
+                        <div class="resource-label">磁盘</div>
+                        <div class="resource-sub" id="dash-disk-detail">-</div>
+                    </div>
+                    <div class="resource-card network-card">
+                        <div class="network-icon">🌐</div>
+                        <div class="network-list" id="dash-network">
+                            <div class="network-item">加载中...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快速统计 -->
+                <div class="section-title">📈 快速统计 Quick Stats</div>
+                <div class="quick-stats">
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">💬</div>
+                        <div class="quick-stat-value" id="dash-stat-sessions">-</div>
+                        <div class="quick-stat-label">活跃会话</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">👥</div>
+                        <div class="quick-stat-value" id="dash-stat-profiles">-</div>
+                        <div class="quick-stat-label">用户画像</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">📚</div>
+                        <div class="quick-stat-value" id="dash-stat-knowledge">-</div>
+                        <div class="quick-stat-label">知识条目</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">🔧</div>
+                        <div class="quick-stat-value" id="dash-stat-tools">-</div>
+                        <div class="quick-stat-label">启用工具</div>
+                    </div>
+                </div>
+
+                <!-- 系统信息 -->
+                <div class="section-title">💻 系统信息 System Info</div>
+                <div class="sys-info-grid">
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">平台</span>
+                        <span class="sys-info-value" id="dash-platform">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">架构</span>
+                        <span class="sys-info-value" id="dash-arch">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">Node.js</span>
+                        <span class="sys-info-value" id="dash-node">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">主机名</span>
+                        <span class="sys-info-value" id="dash-hostname">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">CPU 核心</span>
+                        <span class="sys-info-value" id="dash-cores">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">总内存</span>
+                        <span class="sys-info-value" id="dash-total-mem">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Config -->
+            <div class="page" id="page-config">
+                <div class="card llm-config-shell">
+                    <div class="llm-config-hero">
+                        <div>
+                            <div class="card-title">🧠 LLM 供应商控制台</div>
+                            <div class="llm-config-subtitle">
+                                先维护供应商，再给各模块绑定供应商和模型。URL 和 API Key 只在供应商侧维护。
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="window.openLlmProviderModal()">➕ 添加供应商</button>
+                    </div>
+
+                    <div class="llm-config-layout">
+                        <div class="llm-config-panel llm-provider-panel">
+                            <div class="llm-panel-header">
+                                <div>
+                                    <div class="llm-panel-title">供应商管理</div>
+                                    <div class="llm-panel-subtitle">先刷新并保存模型列表，再给下面的模块绑定供应商和模型。</div>
+                                </div>
+                            </div>
+                            <div class="llm-provider-grid" id="llm-provider-grid"></div>
+                        </div>
+
+                        <div class="llm-config-panel">
+                            <div class="llm-panel-header">
+                                <div>
+                                    <div class="llm-panel-title">模块绑定</div>
+                                    <div class="llm-panel-subtitle">模块侧只选择供应商和模型，模型输入会按供应商已缓存模型即时筛选。</div>
+                                </div>
+                            </div>
+                            <div id="llm-module-groups"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📋 运行参数 Settings</div>
+                    </div>
+                    <div class="stats-grid" id="grid-settings"
+                        style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));"></div>
+                </div>
+                <div class="card runtime-settings-shell">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">⚙️ 运行时设置</div>
+                            <div class="llm-panel-subtitle" id="runtime-settings-subtitle">这些参数会按当前进程角色写入配置，并尝试同步到对应运行进程。</div>
+                        </div>
+                        <button class="btn btn-primary" id="btn-save-runtime-settings" onclick="window.saveRuntimeSettings()">💾 保存设置</button>
+                    </div>
+                    <div class="runtime-health-summary" id="runtime-health-summary"></div>
+                    <div class="form-help" id="runtime-health-note"></div>
+                    <div class="runtime-settings-grid">
+                        <div class="runtime-settings-section">
+                            <div class="runtime-settings-section-title">消息链路</div>
+                            <div class="form-group">
+                                <label class="form-label" for="runtime-napcat-ws-url">NapCat 消息流地址</label>
+                                <input class="form-input" id="runtime-napcat-ws-url" type="text" placeholder="ws://localhost:6702">
+                                <div class="form-help">修改后会写入 `.env`，主进程在线时会尝试立刻切换到新的 NapCat 地址。</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="runtime-debounce-delay">防抖延迟（毫秒）</label>
+                                <input class="form-input" id="runtime-debounce-delay" type="number" min="100" step="100">
+                                <div class="form-help">影响新进入防抖缓冲区的消息，建议保持在 500~3000ms。</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="runtime-memory-window-size">记忆窗口大小</label>
+                                <input class="form-input" id="runtime-memory-window-size" type="number" min="1" step="1">
+                                <div class="form-help">会立即裁剪内存中的上下文窗口，避免历史消息无限增长。</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="runtime-toggle-row" for="runtime-llm-strict-isolation">
+                                    <input id="runtime-llm-strict-isolation" type="checkbox">
+                                    <span>启用 LLM 严格隔离</span>
+                                </label>
+                                <div class="form-help">关闭时允许未独立配置的模块继承主 LLM；开启后，仍继承主配置的 Agent 会标记为不可用，工具模块会直接禁用。</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="runtime-toggle-row" for="runtime-show-reasoning-chain">
+                                    <input id="runtime-show-reasoning-chain" type="checkbox">
+                                    <span>在最终回复里显示思考链</span>
+                                </label>
+                                <div class="form-help">默认关闭。关闭后会在真正发消息前剥离 `<think>`、思考链、推理过程等内容。</div>
+                            </div>
+                        </div>
+                        <div class="runtime-settings-section">
+                            <div class="runtime-settings-section-title">自动表情包</div>
+                            <div class="form-group">
+                                <label class="runtime-toggle-row" for="runtime-auto-meme-enabled">
+                                    <input id="runtime-auto-meme-enabled" type="checkbox">
+                                    <span>启用自动发表情包</span>
+                                </label>
+                                <div class="form-help">这是全局总开关。关闭后不会在回复末尾自动追加表情图。</div>
+                            </div>
+                            <div class="runtime-settings-two-col">
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-auto-meme-preset">全局概率档位</label>
+                                    <select class="form-input" id="runtime-auto-meme-preset" onchange="window.handleAutoMemePresetChange()">
+                                        <option value="low">保守</option>
+                                        <option value="balanced">均衡</option>
+                                        <option value="high">高频</option>
+                                        <option value="custom">自定义</option>
+                                    </select>
+                                    <div class="form-help">预设会直接改下面的概率值。自定义时可手动填写 0 ~ 1。</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-auto-meme-probability">全局概率系数</label>
+                                    <input class="form-input" id="runtime-auto-meme-probability" type="number" min="0" max="1" step="0.01" inputmode="decimal" oninput="window.syncAutoMemeProbabilityState()">
+                                    <div class="form-help" id="runtime-auto-meme-probability-help">当前为均衡档，按场景基础概率线性放大或缩小。</div>
+                                </div>
+                            </div>
+                            <div class="runtime-preset-actions">
+                                <button class="btn btn-sm" type="button" onclick="window.applyAutoMemePreset('low')">全局调低</button>
+                                <button class="btn btn-sm" type="button" onclick="window.applyAutoMemePreset('balanced')">恢复均衡</button>
+                                <button class="btn btn-sm btn-primary" type="button" onclick="window.applyAutoMemePreset('high')">全局调高</button>
+                            </div>
+                            <div class="runtime-inline-note">
+                                当前冷却仍由服务端单独控制：会话冷却和用户冷却不会因为这里调高概率而取消。
+                            </div>
+                        </div>
+                        <div class="runtime-settings-section">
+                            <div class="runtime-settings-section-title">NapCat 适配器</div>
+                            <div class="runtime-settings-two-col">
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-adapter-mode">连接模式</label>
+                                    <select class="form-input" id="runtime-adapter-mode" onchange="window.toggleRuntimeAdapterState()">
+                                        <option value="reverse">reverse</option>
+                                        <option value="forward">forward</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-adapter-access-token">访问令牌</label>
+                                    <input class="form-input" id="runtime-adapter-access-token" type="password" placeholder="留空表示不修改">
+                                    <div class="form-help">出于安全原因不会回显明文令牌。需要修改时重新输入新值。</div>
+                                    <label class="runtime-toggle-row runtime-toggle-compact" for="runtime-adapter-clear-access-token">
+                                        <input id="runtime-adapter-clear-access-token" type="checkbox">
+                                        <span>保存时清空访问令牌</span>
+                                    </label>
+                                </div>
+                                <div class="form-group runtime-setting-span">
+                                    <label class="form-label" for="runtime-adapter-napcat-ws-url">上游 NapCat 地址</label>
+                                    <input class="form-input" id="runtime-adapter-napcat-ws-url" data-adapter-mode-field="forward" type="text" placeholder="ws://127.0.0.1:6700">
+                                    <div class="form-help" data-adapter-mode-help="forward">`forward` 模式时使用。保存后会重启适配器进程。</div>
+                                </div>
+                            </div>
+                            <div class="runtime-settings-two-col">
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-adapter-reverse-host">反向监听地址</label>
+                                    <input class="form-input" id="runtime-adapter-reverse-host" data-adapter-mode-field="reverse" type="text" placeholder="0.0.0.0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-adapter-reverse-port">反向监听端口</label>
+                                    <input class="form-input" id="runtime-adapter-reverse-port" data-adapter-mode-field="reverse" type="number" min="1" max="65535" step="1">
+                                </div>
+                                <div class="form-group runtime-setting-span">
+                                    <label class="form-label" for="runtime-adapter-reverse-path">反向路径</label>
+                                    <input class="form-input" id="runtime-adapter-reverse-path" data-adapter-mode-field="reverse" type="text" placeholder="/onebot">
+                                </div>
+                            </div>
+                            <div class="runtime-settings-two-col">
+                                <div class="form-group">
+                                    <label class="runtime-toggle-row" for="runtime-adapter-enable-stream">
+                                        <input id="runtime-adapter-enable-stream" type="checkbox" onchange="window.toggleRuntimeAdapterState()">
+                                        <span>启用消息流服务</span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-adapter-stream-host">消息流监听地址</label>
+                                    <input class="form-input" id="runtime-adapter-stream-host" data-adapter-stream-field="true" type="text" placeholder="0.0.0.0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-adapter-stream-port">消息流端口</label>
+                                    <input class="form-input" id="runtime-adapter-stream-port" data-adapter-stream-field="true" type="number" min="1" max="65535" step="1">
+                                </div>
+                            </div>
+                            <div class="runtime-settings-two-col">
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-adapter-owner-qq">通知主人 QQ</label>
+                                    <input class="form-input" id="runtime-adapter-owner-qq" type="text" placeholder="例如 123456789">
+                                </div>
+                                <div class="form-group runtime-setting-span">
+                                    <label class="form-label" for="runtime-adapter-owner-notify-text">连接成功通知文本</label>
+                                    <input class="form-input" id="runtime-adapter-owner-notify-text" type="text" placeholder="已经连上啦！！">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="runtime-settings-section">
+                            <div class="runtime-settings-section-title">工具自维护</div>
+                            <div class="form-group">
+                                <label class="runtime-toggle-row" for="runtime-self-maintainer-enabled">
+                                    <input id="runtime-self-maintainer-enabled" type="checkbox" onchange="window.toggleRuntimeSettingsState()">
+                                    <span>启用后台自动维护</span>
+                                </label>
+                                <div class="form-help">开启后会定时扫描失败工具日志，并保守地调用维护链路。</div>
+                            </div>
+                            <div class="runtime-settings-two-col">
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-self-maintainer-interval">巡检间隔（毫秒）</label>
+                                    <input class="form-input" id="runtime-self-maintainer-interval" data-self-maintainer-field type="number" min="60000" step="60000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-self-maintainer-window">失败窗口（毫秒）</label>
+                                    <input class="form-input" id="runtime-self-maintainer-window" data-self-maintainer-field type="number" min="60000" step="60000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-self-maintainer-min-failures">最少失败次数</label>
+                                    <input class="form-input" id="runtime-self-maintainer-min-failures" data-self-maintainer-field type="number" min="1" step="1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="runtime-self-maintainer-cooldown">冷却时间（毫秒）</label>
+                                    <input class="form-input" id="runtime-self-maintainer-cooldown" data-self-maintainer-field type="number" min="60000" step="60000">
+                                </div>
+                                <div class="form-group runtime-setting-span">
+                                    <label class="form-label" for="runtime-self-maintainer-max-tools">单轮最多维护工具数</label>
+                                    <input class="form-input" id="runtime-self-maintainer-max-tools" data-self-maintainer-field type="number" min="1" step="1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="runtime-self-maintainer-allowed-tools">允许维护工具名单</label>
+                                <textarea class="form-input form-textarea" id="runtime-self-maintainer-allowed-tools" data-self-maintainer-field rows="3"
+                                    placeholder="留空表示不限制，可用逗号或换行分隔，例如：music, weather, draw"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="runtime-self-maintainer-blocked-tools">禁止维护工具名单</label>
+                                <textarea class="form-input form-textarea" id="runtime-self-maintainer-blocked-tools" data-self-maintainer-field rows="3"
+                                    placeholder="可用逗号或换行分隔，例如：cron_scheduler, tool_log"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools -->
+            <div class="page" id="page-tools">
+                <div class="toggle-grid" id="grid-tools"></div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header">
+                        <div class="card-title">🗒️ 调用日志 Logs</div>
+                    </div>
+                    <div class="table-container tool-logs-table">
+                        <table class="table" id="table-tool-logs">
+                            <thead>
+                                <tr>
+                                    <th>时间 Time</th>
+                                    <th>工具 Tool</th>
+                                    <th>参数 Params</th>
+                                    <th>结果 Result</th>
+                                    <th>用户 User</th>
+                                    <th>耗时 Duration</th>
+                                    <th>操作 Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="tool-logs-mobile" id="tool-logs-mobile"></div>
+                </div>
+            </div>
+
+            <!-- Agents -->
+            <div class="page" id="page-agents">
+                <div class="toggle-grid" id="grid-agents"></div>
+            </div>
+
+            <!-- Profiles -->
+            <div class="page" id="page-profiles">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">用户列表</div>
+                        <div class="card-header-actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteAllProfiles()">🗑️ 删除全部画像</button>
+                            <button class="btn btn-primary btn-sm" onclick="exportProfiles()">📤 导出数据</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="table-profiles">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>昵称</th>
+                                    <th>好感度</th>
+                                    <th>活跃度</th>
+                                    <th>最后活跃</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Knowledge -->
+            <div class="page" id="page-knowledge">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">知识片段 Knowledge Base</div>
+                        <button class="btn btn-primary btn-sm" onclick="window.openAddKnowledgeModal()">➕ 添加知识</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="table-knowledge">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>内容摘要</th>
+                                    <th>来源</th>
+                                    <th>分类</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meme Packs -->
+            <div class="page" id="page-memes">
+                <div class="card meme-runtime-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">🎯 自动发表情控制</div>
+                            <div class="stat-label" style="margin-top: 6px;">这里是表情包页专用控制区，改完点保存就会立即写入并同步 agent。</div>
+                        </div>
+                        <div class="card-header-actions">
+                            <button class="btn btn-sm" type="button" onclick="window.applyMemePanelPresetAndSave('low')">全局调低</button>
+                            <button class="btn btn-sm" type="button" onclick="window.applyMemePanelPresetAndSave('balanced')">恢复均衡</button>
+                            <button class="btn btn-sm btn-primary" type="button" onclick="window.applyMemePanelPresetAndSave('high')">全局调高</button>
+                        </div>
+                    </div>
+                    <div class="meme-runtime-grid">
+                        <div class="form-group">
+                            <label class="runtime-toggle-row" for="meme-runtime-enabled">
+                                <input id="meme-runtime-enabled" type="checkbox">
+                                <span>启用自动发表情包</span>
+                            </label>
+                            <div class="form-help">总开关。关闭后不会在回复末尾自动追加表情包。</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meme-runtime-preset">全局概率档位</label>
+                            <select class="form-input" id="meme-runtime-preset" onchange="window.handleMemePanelPresetChange()">
+                                <option value="low">保守</option>
+                                <option value="balanced">均衡</option>
+                                <option value="high">高频</option>
+                                <option value="custom">自定义</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meme-runtime-probability">全局概率系数</label>
+                            <input class="form-input" id="meme-runtime-probability" type="number" min="0" max="1" step="0.01" inputmode="decimal" oninput="window.syncMemePanelProbabilityState()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meme-runtime-status">当前说明</label>
+                            <div class="meme-runtime-status" id="meme-runtime-status">加载中...</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meme-runtime-session-cooldown">会话冷却（毫秒）</label>
+                            <input class="form-input" id="meme-runtime-session-cooldown" type="number" min="0" step="1000">
+                            <div class="form-help">同一会话连续发图的最短间隔。设成 `0` 表示不做会话冷却。</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meme-runtime-user-cooldown">用户冷却（毫秒）</label>
+                            <input class="form-input" id="meme-runtime-user-cooldown" type="number" min="0" step="1000">
+                            <div class="form-help">同一用户连续触发表情的最短间隔。设成 `0` 表示不做用户冷却。</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="runtime-toggle-row" for="meme-runtime-disable-private">
+                                <input id="meme-runtime-disable-private" type="checkbox" oninput="window.syncMemePanelProbabilityState()">
+                                <span>私聊禁用自动表情</span>
+                            </label>
+                            <div class="form-help">打开后，只有群聊回复才会自动追加表情包。</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="runtime-toggle-row" for="meme-runtime-disable-tool-media">
+                                <input id="meme-runtime-disable-tool-media" type="checkbox" oninput="window.syncMemePanelProbabilityState()">
+                                <span>本轮已有媒体时跳过</span>
+                            </label>
+                            <div class="form-help">打开后，如果工具本轮已经发了图片/视频/语音，就不再额外追加表情。</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meme-runtime-max-recent-session">会话去重窗口</label>
+                            <input class="form-input" id="meme-runtime-max-recent-session" type="number" min="1" step="1">
+                            <div class="form-help">记住最近多少张已发图片，避免短时间内重复。</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="meme-runtime-max-recent-pack">单分组去重窗口</label>
+                            <input class="form-input" id="meme-runtime-max-recent-pack" type="number" min="1" step="1">
+                            <div class="form-help">同一表情分组内，最近多少张图不重复发送。</div>
+                        </div>
+                    </div>
+                    <div class="meme-runtime-footer">
+                        <div class="runtime-inline-note">如果只想临时调高/调低，直接点上面的快捷按钮即可；如果是自定义值，改完点右侧保存。</div>
+                        <button class="btn btn-primary" id="btn-save-meme-runtime" type="button" onclick="window.saveMemeRuntimeSettings()">💾 保存并生效</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">表情包管理 Meme Packs</div>
+                            <div class="stat-label" id="memes-meta-info" style="margin-top: 6px;">-</div>
+                        </div>
+                        <div class="card-header-actions">
+                            <button class="btn btn-sm" onclick="window.cleanupMemeOrphans()">🧹 清孤儿</button>
+                            <button class="btn btn-sm" onclick="window.reloadMemeCatalog()">🔄 重载</button>
+                            <button class="btn btn-primary btn-sm" onclick="window.openMemeModal()">➕ 新建分组</button>
+                        </div>
+                    </div>
+                    <div id="memes-pack-grid" class="meme-pack-grid"></div>
+                    <div id="memes-orphan-panel" class="meme-orphan-panel"></div>
+                </div>
+            </div>
+
+            <!-- Context Memory -->
+            <div class="page" id="page-context">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">活跃会话 Active Sessions</div>
+                        <button class="btn btn-danger btn-sm" onclick="window.clearAllContext()">🧹 清除所有</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="table-context">
+                            <thead>
+                                <tr>
+                                    <th>ID / Key</th>
+                                    <th>消息数</th>
+                                    <th>最后活跃</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blacklist -->
+            <div class="page" id="page-blacklist">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">NapCat 入口过滤规则</div>
+                    </div>
+                    <div style="color: var(--text-sub); margin-bottom: 12px; line-height: 1.6;">
+                        这里配置的是 <strong>genesis-napcat-adapter</strong> 的真实入口过滤。
+                        “私聊用户” 规则只作用于私聊，“群聊群组” 规则只作用于群消息。
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <select class="select" id="bl-type" style="width: 100px;">
+                            <option value="user">私聊用户</option>
+                            <option value="group">群聊群组</option>
+                        </select>
+                        <input class="input" id="bl-target" placeholder="QQ号 / 群号" style="width: 150px;">
+                        <input class="input" id="bl-reason" placeholder="备注，可选" style="flex: 1; min-width: 180px;">
+                        <select class="select" id="bl-list" style="width: 100px;">
+                            <option value="black">黑名单</option>
+                            <option value="white">白名单</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="window.addBlacklist()">添加</button>
+                    </div>
+                </div>
+                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 16px; color: #f85149;">🚫 黑名单 Refuse</div>
+                        <div class="table-container">
+                            <table class="table" id="table-blacklist">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>原因</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 16px; color: #3fb950;">✅ 白名单 Allow</div>
+                        <div class="table-container">
+                            <table class="table" id="table-whitelist">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>原因</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks -->
+            <div class="page" id="page-tasks">
+                <!-- 任务统计卡片 -->
+                <div class="quick-stats" style="margin-bottom: 24px;">
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">📊</div>
+                        <div class="quick-stat-value" id="task-stat-total">-</div>
+                        <div class="quick-stat-label">总任务数</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">⏳</div>
+                        <div class="quick-stat-value" id="task-stat-pending">-</div>
+                        <div class="quick-stat-label">等待中</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">🔄</div>
+                        <div class="quick-stat-value" id="task-stat-running">-</div>
+                        <div class="quick-stat-label">执行中</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">✅</div>
+                        <div class="quick-stat-value" id="task-stat-success">-</div>
+                        <div class="quick-stat-label">成功</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">❌</div>
+                        <div class="quick-stat-value" id="task-stat-failed">-</div>
+                        <div class="quick-stat-label">失败</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">⏱️</div>
+                        <div class="quick-stat-value" id="task-stat-avgtime">-</div>
+                        <div class="quick-stat-label">平均耗时</div>
+                    </div>
+                </div>
+
+                <!-- 任务列表 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📋 任务列表 Task Queue</div>
+                        <div style="display: flex; gap: 8px;">
+                            <select class="select" id="task-filter-status" style="width: 120px;">
+                                <option value="">全部状态</option>
+                                <option value="pending">等待中</option>
+                                <option value="running">执行中</option>
+                                <option value="success">成功</option>
+                                <option value="failed">失败</option>
+                                <option value="timeout">超时</option>
+                                <option value="cancelled">已取消</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="window.refreshTasks()">🔄 刷新</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="table-tasks">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>工具 Tool</th>
+                                    <th>用户 User</th>
+                                    <th>状态 Status</th>
+                                    <th>优先级</th>
+                                    <th>创建时间</th>
+                                    <th>耗时</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div class="page" id="page-logs">
+                <div class="card" style="background: #000; border: none; padding: 0;">
+                    <div class="log-terminal" id="log-terminal">
+                        <div class="log-line" style="color: #666;">> System ready. Waiting for logs...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LLM Calls -->
+            <div class="page" id="page-llm">
+                <!-- LLM 统计卡片 -->
+                <div class="quick-stats" style="margin-bottom: 24px;">
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">📊</div>
+                        <div class="quick-stat-value" id="llm-stat-total">-</div>
+                        <div class="quick-stat-label">总调用</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">🎯</div>
+                        <div class="quick-stat-value" id="llm-stat-success">-</div>
+                        <div class="quick-stat-label">成功率</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">⏱️</div>
+                        <div class="quick-stat-value" id="llm-stat-avgtime">-</div>
+                        <div class="quick-stat-label">平均耗时</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">📥</div>
+                        <div class="quick-stat-value" id="llm-stat-input-tokens">-</div>
+                        <div class="quick-stat-label">Input Tokens</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">📤</div>
+                        <div class="quick-stat-value" id="llm-stat-output-tokens">-</div>
+                        <div class="quick-stat-label">Output Tokens</div>
+                    </div>
+                </div>
+
+                <!-- LLM 调用日志列表 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🔗 调用日志 LLM Calls</div>
+                        <div style="display: flex; gap: 8px;">
+                            <select class="select" id="llm-log-view-mode" onchange="window.onLlmLogViewOptionsChange()" style="min-width: 130px;">
+                                <option value="flat">原始列表</option>
+                                <option value="grouped">按分组展示</option>
+                            </select>
+                            <select class="select" id="llm-log-group-mode" onchange="window.onLlmLogViewOptionsChange()" style="min-width: 150px;">
+                                <option value="family">按模块族分组</option>
+                                <option value="caller">按原始 Caller 分组</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="window.refreshLlmLogs()">🔄 刷新</button>
+                            <button class="btn btn-danger btn-sm" onclick="window.clearLlmLogs()">🧹 清空</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="table-llm-logs">
+                            <thead>
+                                <tr>
+                                    <th>时间 Time</th>
+                                    <th>调用方 Caller</th>
+                                    <th>模型 Model</th>
+                                    <th>Tokens</th>
+                                    <th>耗时 Duration</th>
+                                    <th>状态 Status</th>
+                                    <th>操作 Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduler -->
+            <div class="page" id="page-scheduler">
+                <!-- 统计卡片 -->
+                <div class="quick-stats" style="margin-bottom: 24px;">
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">📊</div>
+                        <div class="quick-stat-value" id="sched-stat-total">-</div>
+                        <div class="quick-stat-label">总任务</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">✅</div>
+                        <div class="quick-stat-value" id="sched-stat-enabled">-</div>
+                        <div class="quick-stat-label">已启用</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">🔄</div>
+                        <div class="quick-stat-value" id="sched-stat-running">-</div>
+                        <div class="quick-stat-label">运行中</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">🎯</div>
+                        <div class="quick-stat-value" id="sched-stat-success">-</div>
+                        <div class="quick-stat-label">成功</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">❌</div>
+                        <div class="quick-stat-value" id="sched-stat-failed">-</div>
+                        <div class="quick-stat-label">失败</div>
+                    </div>
+                </div>
+
+                <!-- 任务列表 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⏰ 定时任务列表 Scheduled Tasks</div>
+                        <div style="display: flex; gap: 8px;">
+                            <select class="select" id="sched-filter-status" style="width: 120px;">
+                                <option value="">全部状态</option>
+                                <option value="idle">空闲</option>
+                                <option value="running">运行中</option>
+                                <option value="success">成功</option>
+                                <option value="failed">失败</option>
+                                <option value="disabled">已禁用</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="window.openCreateSchedulerTask()">➕
+                                添加任务</button>
+                            <button class="btn btn-sm" onclick="window.refreshScheduler()">🔄 刷新</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="table-scheduler">
+                            <thead>
+                                <tr>
+                                    <th>名称 Name</th>
+                                    <th>工具 Tool</th>
+                                    <th>调度 Schedule</th>
+                                    <th>状态 Status</th>
+                                    <th>下次执行</th>
+                                    <th>上次执行</th>
+                                    <th>次数</th>
+                                    <th>操作 Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modal-meme">
+        <div class="modal" style="width: 980px; max-width: 95vw;">
+            <div class="modal-header"><span id="meme-modal-title">表情包分组</span> <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button></div>
+            <div class="modal-body" id="meme-modal-body" style="max-height: 75vh; overflow-y: auto;"></div>
+            <div class="modal-footer" id="meme-modal-footer">
+                <button class="btn" onclick="window.closeModals()">取消</button>
+                <button class="btn btn-primary" onclick="window.saveMemePack()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-knowledge">
+        <div class="modal">
+            <div class="modal-header">添加知识 <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button></div>
+            <div class="modal-body">
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block;margin-bottom:8px;">内容文本</label>
+                    <textarea class="input" id="k-text" rows="8" placeholder="在此输入知识库内容..."></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div><label style="display:block;margin-bottom:8px;">来源 Source</label><input class="input"
+                            id="k-source" value="Web控制台"></div>
+                    <div><label style="display:block;margin-bottom:8px;">分类 Category</label><input class="input"
+                            id="k-category" placeholder="可选"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="window.closeModals()">取消</button>
+                <button class="btn btn-primary" onclick="window.submitKnowledge()">保存知识</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-profile">
+        <div class="modal modal-profile">
+            <div class="modal-header"><span id="p-nickname">用户详情</span> <button class="btn"
+                    style="border:none;background:none;" onclick="window.closeModals()">×</button></div>
+            <div class="modal-body">
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div>
+                        <div class="stat-label">QQ</div>
+                        <div id="p-id" style="font-size:16px;">-</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">好感度</div>
+                        <div id="p-favor" style="font-size:20px;font-weight:bold;color:var(--accent);">-</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">消息数</div>
+                        <div id="p-msgs" style="font-size:16px;">-</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div class="stat-label">性格标签 Traits</div>
+                    <div class="chips" id="p-traits"></div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div class="stat-label">兴趣爱好 Interests</div>
+                    <div class="chips" id="p-interests"></div>
+                </div>
+                <div>
+                    <div class="stat-label">AI 印象摘要 Summary</div>
+                    <div style="background:var(--bg-body);padding:12px;border-radius:6px;margin-top:8px;font-size:13px;line-height:1.5;"
+                        id="p-summary">-</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="btn-delete-profile">删除画像</button>
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Modal -->
+    <div class="modal-overlay" id="modal-context">
+        <div class="modal" style="width: 800px;">
+            <div class="modal-header">
+                <span>会话详情</span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; background: #0d1117;">
+                <div id="context-messages" style="font-family: var(--font-mono); font-size: 13px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="btn-clear-context">清除记忆</button>
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tools Log Details Modal -->
+    <div class="modal-overlay" id="modal-log-details">
+        <div class="modal" style="width: 800px;">
+            <div class="modal-header">
+                <span><span>📃</span> 日志详情 <small id="log-detail-id"
+                        style="color:var(--text-sub);margin-left:8px;font-weight:normal;">-</small></span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="log-detail-section">
+                    <div class="stat-label">基本信息 Info</div>
+                    <div class="sys-info-grid"
+                        style="grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">工具 Tool</span>
+                            <span class="sys-info-value" id="log-detail-tool">-</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">用户 User</span>
+                            <span class="sys-info-value" id="log-detail-user">-</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">耗时 Duration</span>
+                            <span class="sys-info-value" id="log-detail-duration">-</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">状态 Status</span>
+                            <span class="sys-info-value" id="log-detail-status">-</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">时间 Time</span>
+                            <span class="sys-info-value" id="log-detail-time">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="log-detail-section" style="margin-top: 20px;">
+                    <div class="stat-label">调用参数 Parameters</div>
+                    <pre class="code-block" id="log-detail-params"
+                        style="margin-top:8px;max-height:200px;overflow:auto;"></pre>
+                </div>
+
+                <div class="log-detail-section" style="margin-top: 20px;">
+                    <div class="stat-label">执行结果 Result</div>
+                    <pre class="code-block" id="log-detail-result"
+                        style="margin-top:8px;max-height:300px;overflow:auto;white-space:pre-wrap;"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool Test Modal -->
+    <div class="modal-overlay" id="modal-tool-test">
+        <div class="modal" style="width: 1100px; max-width: 95vw;">
+            <div class="modal-header">
+                <span>🧪 工具测试 <span id="test-tool-name" style="color:var(--accent);margin-left:8px;"></span></span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                <div class="tool-test-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+                    <!-- Left: Input -->
+                    <div class="tool-test-input">
+                        <div class="form-group">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <label class="form-label" style="margin:0;">📝 参数 Parameters</label>
+                                <div class="tab-switcher">
+                                    <button class="tab-btn active" data-tab="form"
+                                        onclick="window.switchParamTab('form')">📋 表单</button>
+                                    <button class="tab-btn" data-tab="json" onclick="window.switchParamTab('json')">{}
+                                        JSON</button>
+                                </div>
+                            </div>
+                            <!-- Form Mode -->
+                            <div id="test-tool-params-form" class="tool-params-form param-tab-content active">
+                                <div class="empty-params">请选择工具以加载参数表单</div>
+                            </div>
+                            <!-- JSON Mode -->
+                            <textarea id="test-tool-params-json" class="tool-params-json param-tab-content"
+                                placeholder='{"key": "value"}'
+                                style="display:none; height: 280px; width: 100%; font-family: var(--font-mono); font-size: 13px;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; margin-top: 16px;">
+                            <button class="btn btn-primary" onclick="window.executeToolTest()" id="btn-execute-test">
+                                ▶️ 执行测试
+                            </button>
+                            <span id="test-duration"
+                                style="font-family: var(--font-mono); color: var(--accent); font-size: 14px;"></span>
+                        </div>
+                    </div>
+                    <!-- Right: Output -->
+                    <div class="tool-test-output">
+                        <div class="form-group">
+                            <label class="form-label">📤 请求 REQUEST</label>
+                            <pre class="code-block" id="test-request" style="height: 120px; overflow: auto;"></pre>
+                        </div>
+                        <div class="form-group" style="margin-top: 16px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label class="form-label" style="margin:0;">📥 响应 RESPONSE</label>
+                                <div class="tab-switcher">
+                                    <button class="tab-btn active" data-tab="json"
+                                        onclick="window.switchResponseTab('json')">{} JSON</button>
+                                    <button class="tab-btn" data-tab="reply"
+                                        onclick="window.switchResponseTab('reply')">💬 回复</button>
+                                </div>
+                            </div>
+                            <!-- JSON Mode -->
+                            <pre class="code-block response-tab-content" id="test-response"
+                                style="height: 200px; overflow: auto;"></pre>
+                            <!-- Reply Preview Mode -->
+                            <div class="reply-preview response-tab-content" id="test-reply-preview"
+                                style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LLM Provider Modal -->
+    <div class="modal-overlay" id="modal-llm-provider-form">
+        <div class="modal" style="width: 640px;">
+            <div class="modal-header">
+                <span id="llm-provider-form-title">添加供应商</span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="llm-provider-id">
+                <div class="form-group">
+                    <label class="form-label">预设模板</label>
+                    <select class="select" id="llm-provider-template" onchange="window.applyLlmProviderTemplate()"></select>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-label">供应商名称 *</label>
+                    <input class="input" id="llm-provider-name" placeholder="例如：Provider A / SenAPI / GPTGod">
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-label">Base URL *</label>
+                    <input class="input" id="llm-provider-base-url" placeholder="https://api.example.com/v1">
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-label">API Key</label>
+                    <input class="input" id="llm-provider-api-key" type="password"
+                        placeholder="新增时填写；编辑时留空表示保持当前值">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="window.closeModals()">取消</button>
+                <button class="btn btn-primary" onclick="window.saveLlmProvider()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LLM Model Browser Modal -->
+    <div class="modal-overlay" id="modal-llm-model-browser">
+        <div class="modal" style="width: 760px; max-width: 95vw;">
+            <div class="modal-header">
+                <span id="llm-model-browser-title">模型缓存</span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">筛选关键词</label>
+                    <div class="llm-model-search-bar">
+                        <input class="input" id="llm-model-query" placeholder="例如：gpt-4o、gemini、qwen"
+                            oninput="window.searchLlmModels()">
+                        <button class="btn btn-primary" onclick="window.searchLlmModels()">筛选</button>
+                    </div>
+                </div>
+                <div class="llm-browser-status" id="llm-model-browser-status">先在上方供应商管理刷新模型，再给模块绑定。</div>
+                <div class="llm-model-list" id="llm-model-browser-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div class="modal-overlay" id="modal-task">
+        <div class="modal" style="width: 700px;">
+            <div class="modal-header">
+                <span>📋 任务详情 <small id="task-detail-id"
+                        style="color:var(--text-sub);margin-left:8px;font-weight:normal;">-</small></span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="sys-info-grid"
+                    style="grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">工具 Tool</span>
+                        <span class="sys-info-value" id="task-detail-tool">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">用户 User</span>
+                        <span class="sys-info-value" id="task-detail-user">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">状态 Status</span>
+                        <span class="sys-info-value" id="task-detail-status">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">优先级</span>
+                        <span class="sys-info-value" id="task-detail-priority">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">创建时间</span>
+                        <span class="sys-info-value" id="task-detail-created">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">耗时</span>
+                        <span class="sys-info-value" id="task-detail-duration">-</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div class="stat-label">参数 Parameters</div>
+                    <pre class="code-block" id="task-detail-params"
+                        style="margin-top:8px;max-height:150px;overflow:auto;"></pre>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div class="stat-label">执行结果 Result</div>
+                    <pre class="code-block" id="task-detail-result"
+                        style="margin-top:8px;max-height:200px;overflow:auto;white-space:pre-wrap;"></pre>
+                </div>
+
+                <div id="task-detail-error-section" style="display:none;">
+                    <div class="stat-label" style="color:#f85149;">错误信息 Error</div>
+                    <pre class="code-block" id="task-detail-error" style="margin-top:8px;color:#f85149;"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="btn-cancel-task" style="display:none;">🚫 取消任务</button>
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LLM Call Detail Modal -->
+    <div class="modal-overlay" id="modal-llm-detail">
+        <div class="modal" style="width: 900px; max-width: 95vw;">
+            <div class="modal-header">
+                <span>🔗 LLM 调用详情 <small id="llm-detail-id"
+                        style="color:var(--text-sub);margin-left:8px;font-weight:normal;">-</small></span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+                <div class="sys-info-grid"
+                    style="grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">调用方 Caller</span>
+                        <span class="sys-info-value" id="llm-detail-caller">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">模型 Model</span>
+                        <span class="sys-info-value" id="llm-detail-model">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">耗时 Duration</span>
+                        <span class="sys-info-value" id="llm-detail-duration">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">状态 Status</span>
+                        <span class="sys-info-value" id="llm-detail-status">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">时间 Time</span>
+                        <span class="sys-info-value" id="llm-detail-time">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">Input Tokens</span>
+                        <span class="sys-info-value" id="llm-detail-input-tokens">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">Output Tokens</span>
+                        <span class="sys-info-value" id="llm-detail-output-tokens">-</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div class="stat-label">📤 请求报文 Request</div>
+                    <pre class="code-block" id="llm-detail-request"
+                        style="margin-top:8px;max-height:250px;overflow:auto;"></pre>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div class="stat-label">📥 响应报文 Response</div>
+                    <pre class="code-block" id="llm-detail-response"
+                        style="margin-top:8px;max-height:250px;overflow:auto;white-space:pre-wrap;"></pre>
+                </div>
+
+                <div id="llm-detail-error-section" style="display:none;">
+                    <div class="stat-label" style="color:#f85149;">❌ 错误信息 Error</div>
+                    <pre class="code-block" id="llm-detail-error" style="margin-top:8px;color:#f85149;"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheduler Create/Edit Modal -->
+    <div class="modal-overlay" id="modal-scheduler-form">
+        <div class="modal" style="width: 700px;">
+            <div class="modal-header">
+                <span id="sched-form-title">创建定时任务</span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <input type="hidden" id="sched-form-id">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">任务名称 *</label>
+                        <input class="input" id="sched-form-name" placeholder="例如：每日天气推送">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">目标工具 *</label>
+                        <select class="select" id="sched-form-tool" style="width:100%;"></select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">调度类型 *</label>
+                        <select class="select" id="sched-form-schedule-type" style="width:100%;"
+                            onchange="window.onSchedTypeChange()">
+                            <option value="cron">周期 Cron</option>
+                            <option value="once">一次性 Once</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="sched-form-cron-group">
+                        <label class="form-label">Cron 表达式 *</label>
+                        <input class="input" id="sched-form-cron" placeholder="0 8 * * * (每早8点)">
+                        <div style="font-size:11px;color:var(--text-sub);margin-top:4px;">格式: 分 时 日 月 周</div>
+                    </div>
+                    <div class="form-group" id="sched-form-runat-group" style="display:none;">
+                        <label class="form-label">执行时间 *</label>
+                        <input type="datetime-local" class="input" id="sched-form-runat">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-label">工具参数 (JSON)</label>
+                    <textarea class="input" id="sched-form-params" rows="4" placeholder='{"city": "深圳"}'
+                        style="font-family:var(--font-mono);font-size:13px;"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">时区</label>
+                        <input class="input" id="sched-form-timezone" value="Asia/Shanghai">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">重试次数</label>
+                        <input type="number" class="input" id="sched-form-retries" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">超时 (秒)</label>
+                        <input type="number" class="input" id="sched-form-timeout" value="60" min="1">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-label">群号 (可选，留空则私聊通知)</label>
+                    <input type="number" class="input" id="sched-form-group" placeholder="群号">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="window.closeModals()">取消</button>
+                <button class="btn btn-primary" onclick="window.saveSchedulerTask()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheduler Detail Modal -->
+    <div class="modal-overlay" id="modal-scheduler-detail">
+        <div class="modal modal-scheduler-detail">
+            <div class="modal-header">
+                <span>⏰ 任务详情 <small id="sched-detail-id"
+                        style="color:var(--text-sub);margin-left:8px;font-weight:normal;">-</small></span>
+                <button class="btn" style="border:none;background:none;font-size:20px;"
+                    onclick="window.closeModals()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="sys-info-grid scheduler-detail-grid">
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">名称</span>
+                        <span class="sys-info-value" id="sched-detail-name">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">工具</span>
+                        <span class="sys-info-value" id="sched-detail-tool">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">状态</span>
+                        <span class="sys-info-value" id="sched-detail-status">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">调度</span>
+                        <span class="sys-info-value" id="sched-detail-schedule">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">下次执行</span>
+                        <span class="sys-info-value" id="sched-detail-next">-</span>
+                    </div>
+                    <div class="sys-info-item">
+                        <span class="sys-info-label">执行次数</span>
+                        <span class="sys-info-value" id="sched-detail-count">-</span>
+                    </div>
+                </div>
+
+                <div class="scheduler-detail-section">
+                    <div class="stat-label">工具参数 Parameters</div>
+                    <pre class="code-block" id="sched-detail-params"
+                        style="margin-top:8px;max-height:150px;overflow:auto;"></pre>
+                </div>
+
+                <div class="scheduler-detail-section" id="sched-detail-error-section" style="display:none;">
+                    <div class="stat-label" style="color:#f85149;">错误信息 Error</div>
+                    <pre class="code-block" id="sched-detail-error" style="margin-top:8px;color:#f85149;"></pre>
+                </div>
+
+                <div class="scheduler-detail-section">
+                    <div class="stat-label">执行日志 Execution Logs</div>
+                    <div class="table-container sched-logs-table" style="margin-top: 8px;">
+                        <table class="table" id="table-sched-logs">
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>状态</th>
+                                    <th>耗时</th>
+                                    <th>触发</th>
+                                    <th>尝试</th>
+                                    <th>信息</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="sched-logs-mobile" id="sched-logs-mobile"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-sched-run" onclick="window.runSchedulerFromDetail()">▶️
+                    立即执行</button>
+                <button class="btn btn-primary" id="btn-sched-edit" onclick="window.editSchedulerFromDetail()">✏️
+                    编辑</button>
+                <button class="btn btn-danger" id="btn-sched-delete" onclick="window.deleteSchedulerFromDetail()">🗑️
+                    删除</button>
+                <button class="btn" onclick="window.closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

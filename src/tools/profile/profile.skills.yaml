@@ -1,0 +1,15 @@
+name: profile
+displayName: 查询资料
+version: "1.0.0"
+description: 查询QQ用户资料
+
+triggers:
+  keywords: [查.*资料, 是谁, 个人资料, 查询.*信息, 他呢, 她呢, 这人, 那人]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0

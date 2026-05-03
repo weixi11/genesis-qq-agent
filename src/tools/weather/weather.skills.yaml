@@ -1,0 +1,34 @@
+# weather.module.yaml
+# 天气查询模块
+
+name: weather
+displayName: 天气查询
+version: "1.0.0"
+description: 查询城市天气预报
+
+# ========== 触发条件 ==========
+triggers:
+  keywords:
+    - 天气
+    - 气温
+    - 下雨
+    - 下雪
+    - 温度
+    - 几度
+    - 穿什么
+
+# ========== 权限与限制 ==========
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0
+
+# ========== 错误处理 ==========
+onError:
+  - condition: "error.message.includes('找不到')"
+    response: "找不到这个城市呢，换个名字试试喵~"
+  - condition: "error.message.includes('失败')"
+    response: "天气服务暂时不可用，等会再试试~"

@@ -1,0 +1,94 @@
+/* Music Card Styles */
+.music-card {
+    background: #fdfdfd;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    min-width: 240px;
+    max-width: 280px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    margin-top: 4px;
+}
+
+.music-card:hover {
+    background: #f0f0f0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.music-cover {
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    background: #e1e4e8;
+}
+
+.music-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.music-cover::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    backdrop-filter: blur(2px);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' width='16' height='16'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px;
+}
+
+.music-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.music-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2328;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-artist {
+    font-size: 12px;
+    color: #656d76;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-source {
+    font-size: 10px;
+    color: #999;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Dark mode overrides if needed, assuming global dark theme var is applied via body class or media query */
+/* But here we rely on the specific styles for now. The preview area bg is already dark, so card should pop or blend. */
+/* Based on screenshot, light card on dark bg works well for rich content. */

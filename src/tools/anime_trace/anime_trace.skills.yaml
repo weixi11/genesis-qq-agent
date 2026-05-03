@@ -1,0 +1,15 @@
+name: anime_trace
+displayName: 动漫角色识别
+version: "1.0.0"
+description: 识别动漫/Galgame/二次元游戏图片中的角色
+
+triggers:
+  keywords: [识别角色, 角色识别, 动漫识别, 这是谁, 什么角色, 哪个角色, gal识别, 谁画的, 哪部动漫, 哪个番, 什么番, 出自哪里, 二次元识别]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 3
+  global: 0

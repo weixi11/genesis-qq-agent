@@ -1,0 +1,63 @@
+export interface ProfilerAnalyzePromptInput {
+    nickname: string;
+    messagesWithContext: string;
+    existingProfileSnapshot: string;
+}
+
+export const PROFILER_ANALYZE_SYSTEM_PROMPT = '你是用户画像分析专家。根据上下文准确判断用户态度，只输出 JSON。';
+
+export function buildProfilerAnalyzePrompt(input: ProfilerAnalyzePromptInput): string {
+    return `分析以下用户【${input.nickname}】的消息，提取用户特征并判断好感度变化。
+
+## 消息记录（包含上下文）
+${input.messagesWithContext}
+
+## 已知信息
+${input.existingProfileSnapshot || '- 暂无长期画像'}
+
+## 分析要求
+1. **只分析【${input.nickname}】的发言**，不要臆测，参考上下文理解语境
+2. 提取新的性格特征与兴趣方向，但不要重复已有信息
+3. 维护长期人物档案，重点关注：
+   - identityFacts: 稳定身份事实、自我定位、常驻角色
+   - likes / dislikes / redLines: 偏好、反感、明确雷区
+   - emotionPatterns / emotionalTriggers / calmingSignals: 情绪机制、触发点、安抚方式
+   - relationshipNotes / boundaryNotes: 相处关系线索、边界与禁忌
+   - importantMemories / conflictRecords: 值得长期保留的对话记忆与冲突记录
+4. importantMemories 只保留“以后继续聊天会有用”的记忆，避免流水账
+5. conflictRecords 只记录真实摩擦、误会、边界碰撞，不要把普通吐槽都算冲突
+6. 判断当前情绪倾向
+7. **重要**：判断用户对我（机器人）的态度，给出好感度变化分数
+
+## 好感度判断规则
+- 用户夸奖、感谢、亲近：+1 到 +3
+- 用户中立、普通聊天：0
+- 用户抱怨、不满（需要结合语境判断是针对机器人还是其他事物）：-1 到 -3
+- 明显的辱骂、攻击：-3 到 -5
+
+## 回复格式
+只回复一个 JSON 对象：
+{
+  "newTraits": ["标签1"],
+  "newInterests": ["兴趣1"],
+  "identityFacts": ["是群管理", "喜欢自称社恐"],
+  "likes": ["老歌", "技术折腾"],
+  "dislikes": ["敷衍回复"],
+  "redLines": ["被公开嘲讽"],
+  "emotionPatterns": ["情绪上来时说话更直接"],
+  "emotionalTriggers": ["工具失灵会烦躁"],
+  "calmingSignals": ["被认真解释时会缓和"],
+  "relationshipNotes": ["对机器人有较高信任，愿意交代任务"],
+  "boundaryNotes": ["不喜欢被替他做最终决定"],
+  "importantMemories": [{"summary": "曾让机器人代发博客并接受自主发挥", "importance": 4, "sentiment": "positive"}],
+  "conflictRecords": [{"summary": "因工具失效表达过不满", "importance": 3, "sentiment": "negative", "status": "lingering"}],
+  "mood": "positive|neutral|negative",
+  "favorabilityDelta": 0,
+  "notes": "一到两句概括"
+}
+
+- favorabilityDelta: 好感度变化（-5 到 +5 的整数）
+- 所有数组字段都可以返回空数组
+- short memory 原则：每项尽量一句话，强调“以后有用”
+- 不要编造隐私、现实身份、年龄等没有明确信号的事实`;
+}

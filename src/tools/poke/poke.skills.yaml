@@ -1,0 +1,15 @@
+name: poke
+displayName: 戳一戳
+version: "1.0.0"
+description: 戳一戳用户
+
+triggers:
+  keywords: [戳一戳, 戳一下, 戳他, 戳她, 戳他们]
+
+permissions:
+  allowGroups: all
+  allowPrivate: false
+
+cooldown:
+  perUser: 0
+  global: 0

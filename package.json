@@ -1,0 +1,51 @@
+{
+    "name": "genesis",
+    "version": "1.0.0",
+    "description": "Genesis QQ AI Agent System - 全智全能机器人",
+    "type": "module",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "agent": "node --import tsx scripts/agent-only.mjs",
+        "web": "node --import tsx scripts/web-only.mjs",
+        "lint": "eslint src/ --ext .ts",
+        "lint:fix": "eslint src/ --ext .ts --fix",
+        "lint:report": "eslint src/ --ext .ts --format html --output-file eslint-report.html",
+        "test:scheduler": "node --import tsx --test tests/cron_scheduler/*.test.ts",
+        "test:prompts": "node --import tsx --test tests/prompts/*.test.ts",
+        "test:prompts:update": "node --import tsx tests/prompts/update-snapshots.ts"
+    },
+    "keywords": [
+        "qq",
+        "bot",
+        "agent",
+        "ai"
+    ],
+    "dependencies": {
+        "@lancedb/lancedb": "^0.23.0",
+        "@lancedb/lancedb-win32-x64-msvc": "^0.22.3",
+        "dotenv": "^16.4.5",
+        "express": "^5.2.1",
+        "mammoth": "^1.11.0",
+        "pdf-parse": "^2.4.5",
+        "sql.js": "^1.13.0",
+        "ws": "^8.18.0",
+        "xlsx": "^0.18.5",
+        "yaml": "^2.8.2",
+        "zod": "^3.24.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.18.0",
+        "@types/express": "^5.0.6",
+        "@types/node": "^22.10.1",
+        "@types/pdf-parse": "^1.1.5",
+        "@types/ws": "^8.5.13",
+        "eslint": "^9.18.0",
+        "globals": "^16.0.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.2",
+        "typescript-eslint": "^8.20.0"
+    }
+}

@@ -1,0 +1,15 @@
+name: read_video
+displayName: 视频分析
+version: "1.0.0"
+description: 看视频并分析内容
+
+triggers:
+  keywords: [看视频, 分析视频, 这个视频, 视频内容, 视频里有什么]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0

@@ -1,0 +1,15 @@
+name: task_cancel
+displayName: 取消任务
+version: "1.0.0"
+description: 取消正在等待的任务
+
+triggers:
+  keywords: [取消, 不要了, 别画了, 别做了, 停止, 算了]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0

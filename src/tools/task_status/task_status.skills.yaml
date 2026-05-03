@@ -1,0 +1,15 @@
+name: task_status
+displayName: 任务状态
+version: "1.0.0"
+description: 查询任务执行状态
+
+triggers:
+  keywords: [任务, 进度, 完成了没, 好了吗, 画好了吗, 任务状态]
+
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0

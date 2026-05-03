@@ -1,0 +1,40 @@
+node_modules/
+dist/
+.gitnexus/
+.playwright-cli/
+.tmp/
+output/
+
+# Secrets
+.env
+.env.local
+.env.*.local
+.codex/config.toml
+.claude/settings.local.json
+
+# Logs and reports
+*.log
+*.log.*
+eslint-report.html
+eslint.json
+tsc_errors.log
+eslint_errors.log
+
+# Runtime data
+data/
+data/logs/
+data/lancedb/
+data/*.db
+data/*.sqlite
+data/profiles.json
+
+# Temporary outputs
+tmp_*.json
+anime_trace_response.json
+tsc.txt
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

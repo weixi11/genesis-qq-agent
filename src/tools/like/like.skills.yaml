@@ -1,0 +1,32 @@
+# like.module.yaml
+# 点赞模块
+
+name: like
+displayName: 点赞
+version: "1.0.0"
+description: 给用户点赞
+
+# ========== 触发条件 ==========
+triggers:
+  keywords:
+    - 点赞
+    - 赞一下
+    - 点个赞
+    - 赞他
+    - 赞她
+    - 赞我
+    - 给.+赞
+
+# ========== 权限与限制 ==========
+permissions:
+  allowGroups: all
+  allowPrivate: true
+
+cooldown:
+  perUser: 0
+  global: 0
+
+# ========== 错误处理 ==========
+onError:
+  - condition: "error.message.includes('失败')"
+    response: "点赞失败了，可能是对方设置了限制~"
